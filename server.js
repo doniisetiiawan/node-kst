@@ -15,9 +15,18 @@ const helloWorld = (req, res, next) => {
   res.end('Hello World');
 };
 
+// eslint-disable-next-line no-unused-vars
+const goodbyeWorld = (req, res, next) => {
+  res.setHeader('Content-Type', 'text/plain');
+
+  res.end('Goodbye World');
+};
+
 app.use(logger);
 
-app.use(helloWorld);
+app.use('/hello', helloWorld);
+
+app.use('/goodbye', goodbyeWorld);
 
 app.listen(3000);
 
