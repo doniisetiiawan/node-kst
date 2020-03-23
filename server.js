@@ -1,13 +1,7 @@
-import http from 'http';
+import connect from 'connect';
 
-http
-  .createServer((req, res) => {
-    res.writeHead(200, {
-      'Content-Type': 'text/plain',
-    });
+const app = connect();
 
-    res.end('Hello World');
-  })
-  .listen(3000);
+app.listen(3000);
 
 console.log('Server running at http://localhost:3000/');
