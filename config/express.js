@@ -5,8 +5,9 @@ import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import session from 'express-session';
 
-import routes from '../app/routes/index.server.routes';
 import config from './config';
+import routes from '../app/routes/index.server.routes';
+import users from '../app/routes/users.server.routes';
 
 export default () => {
   const app = express();
@@ -32,6 +33,7 @@ export default () => {
   }));
 
   routes(app);
+  users(app);
 
   app.use(express.static('./public'));
 
