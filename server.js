@@ -1,33 +1,13 @@
-import connect from 'connect';
+import express from 'express';
 
-const app = connect();
+const app = express();
 
-const logger = (req, res, next) => {
-  console.log(req.method, req.url);
-
-  next();
-};
-
-// eslint-disable-next-line no-unused-vars
-const helloWorld = (req, res, next) => {
-  res.setHeader('Content-Type', 'text/plain');
-
-  res.end('Hello World');
-};
-
-// eslint-disable-next-line no-unused-vars
-const goodbyeWorld = (req, res, next) => {
-  res.setHeader('Content-Type', 'text/plain');
-
-  res.end('Goodbye World');
-};
-
-app.use(logger);
-
-app.use('/hello', helloWorld);
-
-app.use('/goodbye', goodbyeWorld);
+app.use('/', (req, res) => {
+  res.send('Hello World');
+});
 
 app.listen(3000);
 
 console.log('Server running at http://localhost:3000/');
+
+export default app;
