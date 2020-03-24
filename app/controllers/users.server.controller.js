@@ -72,6 +72,42 @@ export function signup(req, res, next) {
   }
 }
 
+export function saveOAuthUserProfile(req, profile, done) {
+  User.findOne(
+    {
+      provider: profile.provider,
+      providerId: profile.providerId,
+    },
+    (err, user) => {
+      if (err) {
+        return done(err);
+      }
+      if (!user) {
+        const possibleUsername = profile.username
+          || (profile.email
+            ? profile.email.split('@')[0]
+            : '');
+
+        User.findUniqueUsername(
+          possibleUsername,
+          null,
+          (availableUsername) => {
+            profile.username = availableUsername;
+
+            user = new User(profile);
+
+            user.save((
+              err,
+            ) => done(err, user));
+          },
+        );
+      } else {
+        return done(err, user);
+      }
+    },
+  );
+}
+
 export function signout(req, res) {
   req.logout();
 

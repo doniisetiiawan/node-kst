@@ -2,6 +2,9 @@ import passport from 'passport';
 
 import { User } from '../app/models/user.server.model';
 import local from './strategies/local';
+import facebook from './strategies/facebook';
+import twitter from './strategies/twitter';
+import google from './strategies/google';
 
 export default () => {
   passport.serializeUser((user, done) => {
@@ -21,4 +24,7 @@ export default () => {
   });
 
   local();
+  facebook();
+  twitter();
+  google();
 };

@@ -109,4 +109,5 @@ UserSchema.set('toJSON', {
   virtuals: true,
 });
 
+// eslint-disable-next-line import/prefer-default-export
 export const User = mongoose.model('User', UserSchema);
