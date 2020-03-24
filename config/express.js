@@ -4,6 +4,8 @@ import compress from 'compression';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import session from 'express-session';
+import passport from 'passport';
+import flash from 'connect-flash';
 
 import config from './config';
 import routes from '../app/routes/index.server.routes';
@@ -31,6 +33,10 @@ export default () => {
     resave: true,
     secret: config.sessionSecret,
   }));
+
+  app.use(flash());
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   routes(app);
   users(app);

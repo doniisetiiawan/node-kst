@@ -1,23 +1,28 @@
+import passport from 'passport';
+
 import {
-  create as createusers,
-  list as listusers,
-  read as readusers,
-  userByID as userByIDusers,
-  update as updateusers,
-  deletex as deleteusers,
+  renderSignup,
+  signup,
+  renderSignin,
+  signout,
 } from '../controllers/users.server.controller';
 
 export default (app) => {
   app
-    .route('/users')
-    .post(createusers)
-    .get(listusers);
+    .route('/signup')
+    .get(renderSignup)
+    .post(signup);
 
   app
-    .route('/users/:userId')
-    .get(readusers)
-    .put(updateusers)
-    .delete(deleteusers);
+    .route('/signin')
+    .get(renderSignin)
+    .post(
+      passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/signin',
+        failureFlash: true,
+      }),
+    );
 
-  app.param('userId', userByIDusers);
+  app.get('/signout', signout);
 };

@@ -1,67 +1,79 @@
 import { User } from '../models/user.server.model';
 
-function create(req, res, next) {
-  const user = new User(req.body);
+const getErrorMessage = (err) => {
+  let message = '';
 
-  user.save((err) => {
-    if (err) {
-      return next(err);
+  if (err.code) {
+    switch (err.code) {
+      case 11000:
+      case 11001:
+        message = 'Username already exists';
+        break;
+      default:
+        message = 'Something went wrong';
     }
-    res.json(user);
-  });
-}
-
-function list(req, res, next) {
-  User.find({}, (err, users) => {
-    if (err) {
-      return next(err);
+  } else {
+    for (const errName in err.errors) {
+      if (err.errors[errName].message) message = err.errors[errName].message;
     }
-    res.json(users);
-  });
-}
+  }
 
-function read(req, res) {
-  res.json(req.user);
-}
-
-function update(req, res, next) {
-  User.findByIdAndUpdate(
-    req.user.id,
-    req.body,
-    (err, user) => {
-      if (err) {
-        return next(err);
-      }
-      res.json(user);
-    },
-  );
-}
-
-function deletex(req, res, next) {
-  req.user.remove((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.json(req.user);
-  });
-}
-
-function userByID(req, res, next, id) {
-  User.findOne(
-    {
-      _id: id,
-    },
-    (err, user) => {
-      if (err) {
-        return next(err);
-      }
-      req.user = user;
-
-      next();
-    },
-  );
-}
-
-export {
-  create, list, read, userByID, update, deletex,
+  return message;
 };
+
+// eslint-disable-next-line no-unused-vars
+export function renderSignin(req, res, next) {
+  if (!req.user) {
+    res.send({
+      title: 'Sign-in Form',
+      messages: req.flash('error') || req.flash('info'),
+    });
+  } else {
+    return res.redirect('/');
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
+export function renderSignup(req, res, next) {
+  if (!req.user) {
+    res.send({
+      title: 'Sign-up Form',
+      messages: req.flash('error'),
+    });
+  } else {
+    return res.redirect('/');
+  }
+}
+
+export function signup(req, res, next) {
+  if (!req.user) {
+    const user = new User(req.body);
+    const message = null;
+
+    user.provider = 'local';
+
+    user.save((err) => {
+      if (err) {
+        const message = getErrorMessage(err);
+
+        req.flash('error', message);
+
+        return res.redirect('/signup');
+      }
+
+      req.login(user, (err) => {
+        if (err) return next(err);
+
+        return res.redirect('/');
+      });
+    });
+  } else {
+    return res.redirect('/');
+  }
+}
+
+export function signout(req, res) {
+  req.logout();
+
+  res.redirect('/');
+}

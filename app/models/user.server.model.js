@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 
 const { Schema } = mongoose;
 
@@ -7,42 +8,33 @@ const UserSchema = new Schema({
   lastName: String,
   email: {
     type: String,
-    index: true,
-    match: /.+@.+\..+/,
+    match: [
+      /.+@.+\..+/,
+      'Please fill a valid email address',
+    ],
   },
   username: {
     type: String,
-    trim: true,
     unique: true,
-    required: true,
+    required: 'Username is required',
+    trim: true,
   },
   password: {
     type: String,
     validate: [
-      (password) => password.length >= 6,
-      'Password Should Be Longer',
+      (password) => password && password.length > 6,
+      'Password should be longer',
     ],
   },
-  website: {
+  salt: {
     type: String,
-    get(url) {
-      if (!url) {
-        return url;
-      }
-      if (
-        url.indexOf('http://') !== 0
-        && url.indexOf('https://') !== 0
-      ) {
-        url = `http://${url}`;
-      }
-
-      return url;
-    },
   },
-  role: {
+  provider: {
     type: String,
-    enum: ['Admin', 'Owner', 'User'],
+    required: 'Provider is required',
   },
+  providerId: String,
+  providerData: {},
   created: {
     type: Date,
     default: Date.now,
@@ -59,22 +51,62 @@ UserSchema.virtual('fullName')
     this.lastName = splitName[1] || '';
   });
 
-UserSchema.statics.findOneByUsername = function (
-  username,
-  callback,
-) {
-  this.findOne(
-    {
-      username: new RegExp(username, 'i'),
-    },
-    callback,
-  );
+UserSchema.pre('save', function (next) {
+  if (this.password) {
+    this.salt = Buffer.from(
+      crypto.randomBytes(16).toString('base64'),
+      'base64',
+    );
+    this.password = this.hashPassword(this.password);
+  }
+
+  next();
+});
+
+UserSchema.methods.hashPassword = function (password) {
+  return crypto
+    .pbkdf2Sync(password, this.salt, 10000, 64, 'sha256')
+    .toString('base64');
 };
 
 UserSchema.methods.authenticate = function (password) {
-  return this.password === password;
+  return this.password === this.hashPassword(password);
 };
 
-UserSchema.set('toJSON', { getters: true, virtuals: true });
+UserSchema.statics.findUniqueUsername = function (
+  username,
+  suffix,
+  callback,
+) {
+  const _this = this;
+
+  const possibleUsername = username + (suffix || '');
+
+  _this.findOne(
+    {
+      username: possibleUsername,
+    },
+    (err, user) => {
+      if (!err) {
+        if (!user) {
+          callback(possibleUsername);
+        } else {
+          return _this.findUniqueUsername(
+            username,
+            (suffix || 0) + 1,
+            callback,
+          );
+        }
+      } else {
+        callback(null);
+      }
+    },
+  );
+};
+
+UserSchema.set('toJSON', {
+  getters: true,
+  virtuals: true,
+});
 
 export const User = mongoose.model('User', UserSchema);
