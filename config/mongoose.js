@@ -12,6 +12,8 @@ export default () => {
 
   // eslint-disable-next-line global-require
   require('../app/models/user.server.model');
+  // eslint-disable-next-line global-require
+  require('../app/models/article.server.model');
 
   return db;
 };

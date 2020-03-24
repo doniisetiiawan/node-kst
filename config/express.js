@@ -10,6 +10,7 @@ import flash from 'connect-flash';
 import config from './config';
 import routes from '../app/routes/index.server.routes';
 import users from '../app/routes/users.server.routes';
+import articles from '../app/routes/articles.server.routes';
 
 export default () => {
   const app = express();
@@ -40,6 +41,7 @@ export default () => {
 
   routes(app);
   users(app);
+  articles(app);
 
   app.use(express.static('./public'));
 

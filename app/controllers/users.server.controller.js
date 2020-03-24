@@ -96,9 +96,7 @@ export function saveOAuthUserProfile(req, profile, done) {
 
             user = new User(profile);
 
-            user.save((
-              err,
-            ) => done(err, user));
+            user.save((err) => done(err, user));
           },
         );
       } else {
@@ -112,4 +110,14 @@ export function signout(req, res) {
   req.logout();
 
   res.redirect('/');
+}
+
+export function requiresLogin(req, res, next) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).send({
+      message: 'User is not logged in',
+    });
+  }
+
+  next();
 }
