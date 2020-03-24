@@ -8,13 +8,21 @@ const UserSchema = new Schema({
   email: {
     type: String,
     index: true,
+    match: /.+@.+\..+/,
   },
   username: {
     type: String,
     trim: true,
     unique: true,
+    required: true,
   },
-  password: String,
+  password: {
+    type: String,
+    validate: [
+      (password) => password.length >= 6,
+      'Password Should Be Longer',
+    ],
+  },
   website: {
     type: String,
     get(url) {
@@ -30,6 +38,10 @@ const UserSchema = new Schema({
 
       return url;
     },
+  },
+  role: {
+    type: String,
+    enum: ['Admin', 'Owner', 'User'],
   },
   created: {
     type: Date,
