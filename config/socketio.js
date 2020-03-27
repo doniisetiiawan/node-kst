@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import config from './config';
+import chatfqf from '../app/controllers/chat.server.controller';
 
 export default (server, io, mongoStore) => {
   io.use((socket, next) => {
@@ -8,6 +9,7 @@ export default (server, io, mongoStore) => {
       socket.request,
       {},
       (err) => {
+        console.log(err);
         const sessionId = socket.request.signedCookies['connect.sid'];
 
         mongoStore.get(sessionId, (err, session) => {
@@ -30,5 +32,7 @@ export default (server, io, mongoStore) => {
     );
   });
 
-  io.on('connection', (socket) => {});
+  io.on('connection', (socket) => {
+    chatfqf(io, socket);
+  });
 };
